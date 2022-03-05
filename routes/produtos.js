@@ -1,28 +1,40 @@
 const express = require('express');
 const router = express.Router();
+const mysql = require('../mysql').pool;
 
 
-// retorna todos os produtos
 router.get("/", (req, res, next)=>{
   res.status(200).send({
     mensagem: "Retorna todos os produtos"
   });
 });
 
-// insere um produto
-router.post("/", (req, res, next)=>{
-  const produto = {
-    nome: req.body.nome,
-    preco: req.body.preco 
-  }
 
-  res.status(201).send({
-    mensagem: "Insere um produto",
-    produtoCriado: produto
+router.post("/", (req, res, next)=>{
+  
+  mysql.getConnection((error, conection)=>{
+    conection.query(
+      'INSERT INTO produtos (nome, preco) VALUES (?,?)',
+      [req.body.nome, req.body.preco],
+      (error, resultado, field)=>{
+        conection.release(); //IMPORTANTE: nunca esquecer de fazer isso!!! isso é para liberar a coneccao
+
+        if(error){
+          return res.status(500).send({
+            error: error,
+            response: null
+          });
+        }
+        res.status(201).send({
+          mensagem: "Produto inserido com sucesso",
+          id_produto: resultado.insertId
+        })
+      }
+    )
   });
 });
 
-// retorna os dados de um produto
+
 router.get("/:id_produto", (req, res, next)=>{
   const id = req.params.id_produto; 
   if(id==='especial'){
@@ -38,14 +50,14 @@ router.get("/:id_produto", (req, res, next)=>{
   };
 });
 
-// altera um produto
+
 router.patch("/", (req, res, next)=>{
   res.status(201).send({
     mensagem:"Produto alterado"
   })
 })
 
-// deleta um produto
+
 router.delete("/", (req, res, next)=>{
   res.status(201).send({
     mensagem: "Produto deletado"
