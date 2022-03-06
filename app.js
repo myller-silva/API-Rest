@@ -4,8 +4,8 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
 const rotaProdutos = require('./routes/produtos');
-const rotaPedidos = require('./routes/pedidos')
-
+const rotaPedidos = require('./routes/pedidos');
+const rotaGithub = require('./routes/github');
 
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false})) //apenas dados simples
@@ -19,18 +19,17 @@ app.use((req, res, next)=>{
     'Access-Control-Allow-Header',
     'Origin, X-Requrestd-With, Content-Type, Accept, Autorization'
   );
-
   if(req.method==='OPTIONS'){
     res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
     return res.status(200).send({})
-  }
-
+  };
   next();
 });
 
 
 app.use("/produtos", rotaProdutos);
 app.use("/pedidos", rotaPedidos);
+app.use("/github", rotaGithub);
 
 
 // quando nao encontra uma rota, entra aqui:
